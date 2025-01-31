@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>顔登録</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
+</head>
+<body>
+    <img src="{{ url_for('video_feed') }}" width="640" height="480" id="camera-stream">
+    <form action="{{ url_for('register') }}" method="POST">
+        <label for="name">名前:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">登録</button>
+    </form>
+    <a href="{{ url_for('index') }}" class="home-link">ホームページへ</a>
+</body>
+<style>
+    /* 全体レイアウト */
+    body {
+        background-color: #1a1a1a;  /* 黒背景 */
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        text-align: center;
+        color: #ffffff;  /* 白文字 */
+        display: block; /* 親要素がflexboxの影響を受けないように */
+    }
+
+    /* カメラ映像のスタイル */
+    #camera-stream {
+        border: 3px solid #4a90e2;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* フォーム全体のスタイル */
+    form {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        text-align: left;
+        margin: 0 auto;
+        position: relative; /* 親要素として位置を基準にする */
+        border: 3px solid #4a90e2;
+    }
+
+    /* ラベルと入力欄のスタイル */
+    label {
+        font-size: 1.2rem;
+        color: #ffffff;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    /* 登録ボタンのスタイル */
+    button {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 8px;
+        background-color: #4a90e2;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #357ABD;
+    }
+
+    /* ホームページへのリンクボタンを左下に配置 */
+    .home-link {
+        position: absolute;
+        left: 400px;
+        bottom: 10px; /* フォームの下に少し余白を空けて配置 */
+        padding: 10px 20px;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        border: 1px solid #ccc;
+
+    }
+
+    .home-link:hover {
+        background-color: #357ABD;
+    }
+</style>
+
+</html>

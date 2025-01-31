@@ -1,0 +1,28 @@
+# Python 仮想環境を除外（GitHub に不要）
+venv/
+
+fer2013/
+
+# Python のキャッシュファイルを除外（不要な自動生成ファイル）
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE（開発環境）の設定ファイルを除外（VSCode, PyCharm など）
+.vscode/
+.idea/
+*.sublime-workspace
+
+# 大きなファイル（モデル・データセット）を除外（GitHub に不要）
+*.h5
+*.pkl
+*.ckpt
+*.tflite
+
+# 一時ファイルや OS による不要なファイルを除外
+.DS_Store
+Thumbs.db
+
+# ログファイルを除外
+*.log

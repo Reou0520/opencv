@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellMirror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
+</head>
+<body>
+    <div class="header">
+        <h1>WellMirror</h1>
+        <img src="{{ url_for('static', filename='images/WellMirror_icon.jpeg') }}" alt="WellMirror Logo" class="logo">
+    </div>
+    <div class="buttons">
+        <button onclick="location.href='/register'">顔登録</button>
+        <button onclick="location.href='/login'">ログイン</button>
+        <button onclick="location.href='/smart_mirror'">スマートミラー</button>
+        <button onclick="location.href='/health_record'">健康管理</button>
+    </div>
+
+    {% if user %}
+        <p class="welcome-msg">ようこそ、{{ user }}さん!</p>
+        <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
+    {% else %}
+        <p class="login-msg">ログインしていません。</p>
+    {% endif %}
+</body>
+
+<style>
+    /* 全体レイアウト */
+    body {
+        background-color: #1a1a1a;  /* 黒背景 */
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        text-align: center;
+        color: #ffffff;  /* 白文字 */
+        display: block; /* これを追加して、親要素がflexboxの影響を受けないようにします */
+    }
+
+    /* ヘッダー（ロゴとタイトル） */
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 40px 0 0 50px;
+    }
+
+    .logo {
+        width: 120px;  /* ロゴサイズ */
+        height: 120px; /* 高さも設定して、丸くするための正方形にする */
+        margin-right: 20px;  /* ロゴとタイトルの間隔 */
+        border-radius: 50%;  /* 丸くするために50%に設定 */
+        object-fit: cover;  /* 画像が切れないように中央に収める */
+    }
+
+    h1 {
+        font-size: 4rem;
+        color: #4a90e2;  /* ブルー */
+        margin: 0 30px 0 0;
+    }
+
+    /* ボタンの配置（縦並び） */
+    .buttons {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;  /* ボタンを縦並びにする */
+        align-items: center;  /* ボタンを中央に配置 */
+    }
+
+    button {
+        font-size: 1.2rem;
+        padding: 15px 30px;
+        margin: 10px;
+        border: 2px solid #ffffff; /* 白い枠線を追加 */
+        border-radius: 8px;
+        background-color: transparent; /* 背景色を透明に */
+        color: #ffffff;  /* 文字色は白 */
+        cursor: pointer;
+        transition: all 0.3s ease;  /* すべての変更にアニメーションを追加 */
+        width: 250px;  /* ボタンの幅を固定 */
+    }
+
+    button:hover {
+        background-color: #4a90e2; /* ホバー時に背景を白に */
+        color: #ffffff;  /* ホバー時に文字色を黒に */
+    }
+
+    /* ログイン情報メッセージ */
+    .welcome-msg, .login-msg {
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    /* ログアウトリンク */
+    .logout-link {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #e94e77;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .logout-link:hover {
+        background-color: #d43f65;
+    }
+</style>
+
+
+</html>

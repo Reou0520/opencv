@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートミラー</title>
+</head>
+<body>
+    <img id="video" src="{{ url_for('video_feed_info') }}" alt="カメラフィード">
+    <div class="overlay">
+        <div class="info">
+        </div>
+        <div class="info">
+            <ul>
+            </ul>
+        </div>
+    </div>
+
+    <!-- indexに戻るボタン -->
+    <a href="{{ url_for('index') }}" class="home-link">ホームページへ</a>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;  /* 黒背景 */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            /* height: 100vh; */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #video {
+            margin: 10px auto;
+            width: 800px;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            border: 3px solid #4a90e2; /* 枠線追加 */
+            border-radius: 15px; /* 角を丸くする */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 100%;
+            color: white;
+            z-index: 1;
+            text-align: left;
+        }
+
+        button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #357ab7;
+        }
+
+       /* ホームページへのリンクボタンを左下に配置 */
+        .home-link {
+            position: absolute;
+            left: 400px;
+            bottom: 10px; /* フォームの下に少し余白を空けて配置 */
+            padding: 10px 20px;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            border: 1px solid #ccc;
+
+        }
+
+        .home-link:hover {
+            background-color: #357ABD;
+        }
+    </style>
+</body>
+</html>

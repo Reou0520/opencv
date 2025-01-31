@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康記録</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
+</head>
+<body>
+    <div class="header">
+        <h1>健康記録</h1>
+    </div>
+    <h2>{{ user }}さんの健康記録</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>感情</th>
+                <th>健康状態</th>
+                <th>更新日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record[0] }}</td>  <!-- emotion -->
+                <td>{{ record[1] }}</td>  <!-- health_status -->
+                <td>{{ record[2] }}</td>  <!-- updated_at -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="buttons">
+        <button onclick="location.href='/smart_mirror'">スマートミラー</button>
+        <button onclick="location.href='/'">ホームページへ</button>
+    </div>
+
+</body>
+
+<style>
+    /* 全体レイアウト */
+    body {
+        background-color: #1a1a1a;  /* 黒背景 */
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        text-align: center;
+        color: #ffffff;  /* 白文字 */
+        display: block; /* これを追加して、親要素がflexboxの影響を受けないようにします */
+    }
+
+    /* ヘッダー（タイトル） */
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 40px 0 0 50px;
+    }
+
+    h1 {
+        font-size: 3rem;
+        color: #4a90e2;  /* ブルー */
+        margin: 0 30px 0 0;
+    }
+
+    h2 {
+        font-size: 2rem;
+        margin: 20px 0;
+    }
+
+    /* テーブルのスタイル */
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #4a90e2;
+    }
+
+    th {
+        background-color: #4a90e2;
+        color: white;
+    }
+
+    /* ボタンの配置（縦並び） */
+    .buttons {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;  /* ボタンを縦並びにする */
+        align-items: center;  /* ボタンを中央に配置 */
+    }
+
+    button {
+        font-size: 1.2rem;
+        padding: 15px 30px;
+        margin: 10px;
+        border: 2px solid #ffffff; /* 白い枠線を追加 */
+        border-radius: 8px;
+        background-color: transparent; /* 背景色を透明に */
+        color: #ffffff;  /* 文字色は白 */
+        cursor: pointer;
+        transition: all 0.3s ease;  /* すべての変更にアニメーションを追加 */
+        width: 250px;  /* ボタンの幅を固定 */
+    }
+
+    button:hover {
+        background-color: #4a90e2; /* ホバー時に背景を白に */
+        color: #ffffff;  /* ホバー時に文字色を黒に */
+    }
+</style>
+
+</html>
