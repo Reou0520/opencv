@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# プルリクは成功したかな
 from flask import Flask, request, redirect, url_for, render_template, flash, session, Response
 import cv2
 import numpy as np
