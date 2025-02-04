@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# プルリクは成功したかな
 from flask import Flask, request, redirect, url_for, render_template, flash, session, Response
 import cv2
 import numpy as np
@@ -18,6 +17,7 @@ import time
 from datetime import datetime, timezone
 import tensorflow as tf
 from tensorflow.keras.models import load_model # type: ignore
+from pytz import timezone
 import numpy as np
 
 
@@ -64,7 +64,8 @@ def get_google_calendar_events():
 
     try:
         service = build('calendar', 'v3', credentials=creds)
-        now = datetime.now(timezone.utc).isoformat()  # 修正箇所
+        japan_tz = timezone('Asia/Tokyo')
+        now = datetime.now(japan_tz).isoformat()  # 現在の日付と時間
         events_result = service.events().list(calendarId='primary', timeMin=now,
                                               maxResults=10, singleEvents=True,
                                               orderBy='startTime').execute()
@@ -76,11 +77,21 @@ def get_google_calendar_events():
     event_list = []
     if not events:
         event_list.append('今日の予定はありません。')
+
+    # 今日の日付のイベントのみを表示
+    today = datetime.now(japan_tz).date()  # 今日の日付
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        start_datetime = datetime.fromisoformat(start)
-        formatted_time = start_datetime.strftime('%Y年%m月%d日 %H:%M')
-        event_list.append(f"{formatted_time}: {event['summary']}")
+        start_datetime = datetime.fromisoformat(start).astimezone(japan_tz)
+
+        # 今日の日付と一致するイベントを表示
+        if start_datetime.date() == today:
+            formatted_time = start_datetime.strftime('%Y年%m月%d日 %H:%M')
+            event_list.append(f"{formatted_time}: {event['summary']}")
+
+    # 今日の予定がない場合
+    if not event_list:
+        event_list.append('今日の予定はありません。')
 
     return event_list
 
