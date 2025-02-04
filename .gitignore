@@ -19,6 +19,7 @@ __pycache__/
 *.pkl
 *.ckpt
 *.tflite
+.npy
 
 # 一時ファイルや OS による不要なファイルを除外
 .DS_Store
