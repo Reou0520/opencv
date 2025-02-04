@@ -46,19 +46,26 @@ def resize_face(face, size=(200, 200)):
     return None
 
 
-# Google Calendar APIの認証とスケジュールの取得
 def get_google_calendar_events():
     SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
     creds = None
+
+    # token.jsonが存在する場合、認証情報を読み込む
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+    # 認証情報がないか、期限切れの場合
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            creds.refresh(Request())  # refresh_tokenを使ってリフレッシュ
         else:
+            # 新しい認証フローを開始、access_type='offline'を追加
             flow = InstalledAppFlow.from_client_secrets_file(
                 'client_secret_609420033632-a6vpqqsfhkqm91haelki3upcni796soi.apps.googleusercontent.com.json', SCOPES)
-            creds = flow.run_local_server(port=8080)
+            creds = flow.run_local_server(port=8080, access_type='offline', prompt='consent')  # prompt='consent' を追加
+
+
+        # 新しい認証情報をtoken.jsonに保存
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
