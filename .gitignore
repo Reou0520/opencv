@@ -19,8 +19,9 @@ __pycache__/
 *.pkl
 *.ckpt
 *.tflite
-.npy
-.json
+# 顔データファイルを無視
+face_data_*.npy
+token.json
 
 # 一時ファイルや OS による不要なファイルを除外
 .DS_Store
