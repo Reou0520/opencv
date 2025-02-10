@@ -19,6 +19,8 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model # type: ignore
 from pytz import timezone
 import numpy as np
+from tensorflow.keras.optimizers import Adam # type: ignore
+
 
 
 app = Flask(__name__)
@@ -204,13 +206,16 @@ def add_icon_to_frame(frame, icon_url, position, border_color=(255, 0, 0), borde
 
 
 # モデルのロード
-model = load_model('emotion_model.h5')
+model = load_model('fer2013_mini_XCEPTION.119-0.65.hdf5', compile=False)
+
 
 # 顔検出用のカスケード分類器
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
+model.compile(optimizer=Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
+
 # 感情ラベル
-emotion_labels = ['怒り', '嫌悪', '恐怖', '悲しみ', '幸福', '驚き', '中立']
+emotion_labels = ['怒り', '嫌悪', '恐怖', '笑顔', '悲しみ', '驚き', '中立']
 
 def recognize_emotion(frame):
     emotion = "未検出"  # 顔が検出されない場合のデフォルト値
@@ -218,11 +223,8 @@ def recognize_emotion(frame):
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     for (x, y, w, h) in faces:
-        face = frame[y:y+h, x:x+w]
+        face = gray[y:y+h, x:x+w]  # グレースケール画像を使用
         face_resized = cv2.resize(face, (48, 48))  # 48x48にリサイズ
-        
-        # ResNet50が期待する224x224のサイズに変更
-        face_resized = cv2.resize(face_resized, (224, 224))  # 224x224にリサイズ
         face_array = np.array(face_resized) / 255.0  # 正規化
         face_array = np.expand_dims(face_array, axis=0)  # バッチ次元
         face_array = np.expand_dims(face_array, axis=-1)  # チャンネル次元

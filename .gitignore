@@ -19,6 +19,7 @@ __pycache__/
 *.pkl
 *.ckpt
 *.tflite
+*.hdf5
 # 顔データファイルを無視
 face_data_*.npy
 token.json
