@@ -228,7 +228,8 @@ def recognize_emotion(frame):
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     for (x, y, w, h) in faces:
-        face = gray[y:y+h, x:x+w]  # グレースケール画像を使用
+        # 修正: y+y, x+x を y:y+h, x:x+w に変更
+        face = gray[y:y+h, x:x+w]  # 正しい顔領域の切り出し
         face_resized = cv2.resize(face, (48, 48))  # 48x48にリサイズ
         face_array = np.array(face_resized) / 255.0  # 正規化
         face_array = np.expand_dims(face_array, axis=0)  # バッチ次元
@@ -239,14 +240,13 @@ def recognize_emotion(frame):
         emotion_idx = np.argmax(emotion_pred)
         emotion = emotion_labels[emotion_idx]
 
-        # 顔枠を描画したい場合はそのままOpenCVでOK（枠は文字化けしない）
+        # 顔枠を描画
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        # ここでOpenCVの putText ではなく、PILベースの add_text_to_frame を使う
+        # テキスト描画
         frame = add_text_to_frame(frame, emotion, (x, y - 30))
 
     return frame, emotion
-
 
 # ---カメラ画面---に天気とスケジュールを表示
 FPS = 15  # フレームレートを15fpsに制限
@@ -278,7 +278,7 @@ pulse_rate = 0
 class PulseDetector:
     def __init__(self):
         self.face = Face()
-        self.data_g = np.zeros((100))
+        self.data_g = np.zeros(100)
         self.peak_count = 0
         self.last_check_time = time.time()
 
@@ -286,16 +286,18 @@ class PulseDetector:
         try:
             point = self.face.get_face_point(frame)
             nose = point[30]
-            nose_area = frame[nose[1]-5:nose[1]+5,nose[0]-5:nose[0]+5]
+            nose_area = frame[nose[1]-5:nose[1]+5, nose[0]-5:nose[0]+5]
 
-            gsum = 0.0
+            # pulse.pyと同じ方式でG成分を計算
+            gsum = 0
             for raster in nose_area:
                 for px in raster:
-                    gsum += px[0]
+                    gsum += px[1]  # G成分を取得
             gavg = gsum / 100
             return gavg
         except:
-            return 0
+            print("鼻部分の検出に失敗")
+            return np.mean(self.data_g)
 
     def process_frame(self, frame):
         current_time = time.time()
@@ -306,28 +308,67 @@ class PulseDetector:
 
         # 10秒ごとにピーク検出と脈拍計算
         if current_time - self.last_check_time >= 10:
+            # pulse.pyと同じフーリエ変換処理
             x = np.fft.fft(self.data_g)
             x = np.fft.ifft(x)
             x = x.real
 
-            # ピーク検出
-            maxid = signal.find_peaks(x,
-                                    distance=5,
-                                    height=np.mean(x) + 0.3 * np.std(x),
-                                    prominence=0.2)[0]
+            # ピーク検出（パラメータを調整）
+            peaks, _ = signal.find_peaks(x, 
+                                    distance=5,  # より短い距離で検出
+                                    height=np.mean(x),  # 平均値以上をピークとする
+                                    prominence=0.2)  # ピークの顕著さ
             
             # 脈拍計算
-            self.peak_count = len(maxid)
-            pulse_rate = self.peak_count * 6  # 1分あたりの脈拍数
+            self.peak_count = len(peaks)
+            pulse_rate = self.peak_count * 6
             
-            # キューに結果を送信
-            pulse_rate_queue.put(pulse_rate)
+            # 妥当な範囲の脈拍のみを報告
+            if 40 <= pulse_rate <= 200:
+                pulse_rate_queue.put(pulse_rate)
             
             self.peak_count = 0
             self.last_check_time = current_time
 
             return pulse_rate
         return None
+
+    def draw_pulse_graph(self, frame):
+        try:
+            height, width = frame.shape[:2]
+            graph_width = 200
+            graph_height = 100
+            graph_x = width - graph_width - 10
+            graph_y = height - graph_height - 10
+
+            # グラフの背景を描画（黒い半透明の背景）
+            overlay = frame.copy()
+            cv2.rectangle(overlay, 
+                        (graph_x, graph_y),
+                        (graph_x + graph_width, graph_y + graph_height),
+                        (0, 0, 0),
+                        -1)
+            frame = cv2.addWeighted(overlay, 0.3, frame, 0.7, 0)
+
+            # データの正規化と描画
+            if np.any(self.data_g):
+                normalized_data = signal.detrend(self.data_g)  # トレンド除去
+                normalized_data = (normalized_data - np.min(normalized_data)) / (np.max(normalized_data) - np.min(normalized_data))
+
+                # グラフの描画
+                points = []
+                for i in range(len(self.data_g)):
+                    x = int(graph_x + (i * graph_width / len(self.data_g)))
+                    y = int(graph_y + graph_height - (normalized_data[i] * graph_height * 0.8))
+                    points.append([x, y])
+
+                points = np.array(points, np.int32)
+                cv2.polylines(frame, [points], False, (0, 255, 0), 2)
+
+            return frame
+        except Exception as e:
+            print(f"グラフ描画エラー: {e}")
+            return frame
 
 # generate_frames_with_infoの修正
 def generate_frames_with_info(user_name=None):
@@ -355,11 +396,9 @@ def generate_frames_with_info(user_name=None):
             break
 
         # 脈拍処理
-        pulse_detector.process_frame(frame)
-        
-        # キューから最新の脈拍数を取得
-        if not pulse_rate_queue.empty():
-            pulse_rate = pulse_rate_queue.get()
+        current_pulse = pulse_detector.process_frame(frame)
+        if current_pulse is not None:
+            pulse_rate = current_pulse
 
         current_time = time.time()
         if current_time - last_update_time > update_interval:
@@ -395,16 +434,19 @@ def generate_frames_with_info(user_name=None):
             save_health_record(user_name, emotion, health_status)
             last_save_time = current_time  # 最後に保存した時刻を更新
 
-        # 脈拍情報の表示を追加
-        pulse_status = f"脈拍: {pulse_rate}/分"
+        # 脈拍情報とグラフの表示
         if pulse_rate > 0:
+            pulse_status = f"脈拍: {pulse_rate}/分"
             if 60 <= pulse_rate <= 96:
                 pulse_status += " (正常)"
             elif pulse_rate > 96:
                 pulse_status += " (頻脈)"
             else:
                 pulse_status += " (徐脈)"
-        frame = add_text_to_frame(frame, pulse_status, (10, y_pulse))
+            frame = add_text_to_frame(frame, pulse_status, (10, y_pulse))
+            
+            # 脈波グラフの描画
+            frame = pulse_detector.draw_pulse_graph(frame)
 
         try:
             ret, buffer = cv2.imencode('.jpg', frame)
