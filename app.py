@@ -20,6 +20,11 @@ from tensorflow.keras.models import load_model # type: ignore
 from pytz import timezone
 import numpy as np
 from tensorflow.keras.optimizers import Adam # type: ignore
+from pulse_face import Face
+from scipy import signal
+import numpy as np
+from threading import Thread
+from queue import Queue
 
 
 
@@ -264,21 +269,84 @@ def save_health_record(user_name, emotion, health_status):
 last_save_time = time.time()  # 初期化はグローバルスコープで行う
 save_interval = 10  # 保存間隔（秒）
 
+# グローバル変数の追加
+pulse_rate_queue = Queue()
+last_pulse_check_time = time.time()
+pulse_rate = 0
+
+# 脈拍測定用のクラスを追加
+class PulseDetector:
+    def __init__(self):
+        self.face = Face()
+        self.data_g = np.zeros((100))
+        self.peak_count = 0
+        self.last_check_time = time.time()
+
+    def get_gbr(self, frame):
+        try:
+            point = self.face.get_face_point(frame)
+            nose = point[30]
+            nose_area = frame[nose[1]-5:nose[1]+5,nose[0]-5:nose[0]+5]
+
+            gsum = 0.0
+            for raster in nose_area:
+                for px in raster:
+                    gsum += px[0]
+            gavg = gsum / 100
+            return gavg
+        except:
+            return 0
+
+    def process_frame(self, frame):
+        current_time = time.time()
+        
+        # G成分の値を取得
+        g_value = self.get_gbr(frame)
+        self.data_g = np.append(self.data_g[1:], g_value)
+
+        # 10秒ごとにピーク検出と脈拍計算
+        if current_time - self.last_check_time >= 10:
+            x = np.fft.fft(self.data_g)
+            x = np.fft.ifft(x)
+            x = x.real
+
+            # ピーク検出
+            maxid = signal.find_peaks(x,
+                                    distance=5,
+                                    height=np.mean(x) + 0.3 * np.std(x),
+                                    prominence=0.2)[0]
+            
+            # 脈拍計算
+            self.peak_count = len(maxid)
+            pulse_rate = self.peak_count * 6  # 1分あたりの脈拍数
+            
+            # キューに結果を送信
+            pulse_rate_queue.put(pulse_rate)
+            
+            self.peak_count = 0
+            self.last_check_time = current_time
+
+            return pulse_rate
+        return None
+
+# generate_frames_with_infoの修正
 def generate_frames_with_info(user_name=None):
-    global last_save_time  # グローバル変数を使用するために宣言
+    global last_save_time, pulse_rate
 
     city = "Tokyo"
     weather_info, weather_icon_url = get_weather(city)
     schedule_info = get_google_calendar_events()
 
     last_update_time = time.time()
-    update_interval = 60  # 60秒ごとに情報を更新
+    update_interval = 60
 
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     video_capture = cv2.VideoCapture(0)
+    pulse_detector = PulseDetector()
 
-    y_schedule = 90  # スケジュールの開始位置を設定
-    y_health = y_schedule + 50  # 健康状態の位置はスケジュールの下に設定
+    y_schedule = 90
+    y_health = y_schedule + 50
+    y_pulse = y_health + 50  # 脈拍表示位置
 
     while True:
         success, frame = video_capture.read()
@@ -286,8 +354,12 @@ def generate_frames_with_info(user_name=None):
             print("カメラの読み込みに失敗しました")
             break
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        # 脈拍処理
+        pulse_detector.process_frame(frame)
+        
+        # キューから最新の脈拍数を取得
+        if not pulse_rate_queue.empty():
+            pulse_rate = pulse_rate_queue.get()
 
         current_time = time.time()
         if current_time - last_update_time > update_interval:
@@ -322,6 +394,17 @@ def generate_frames_with_info(user_name=None):
         if user_name and current_time - last_save_time > save_interval:
             save_health_record(user_name, emotion, health_status)
             last_save_time = current_time  # 最後に保存した時刻を更新
+
+        # 脈拍情報の表示を追加
+        pulse_status = f"脈拍: {pulse_rate}/分"
+        if pulse_rate > 0:
+            if 60 <= pulse_rate <= 96:
+                pulse_status += " (正常)"
+            elif pulse_rate > 96:
+                pulse_status += " (頻脈)"
+            else:
+                pulse_status += " (徐脈)"
+        frame = add_text_to_frame(frame, pulse_status, (10, y_pulse))
 
         try:
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -399,7 +482,7 @@ def register():
             print(f"検出された顔の数: {len(faces)}")
 
             for (x, y, w, h) in faces:
-                face = gray[y:y+h, x:x+w]
+                face = gray[y+y, x+x]
                 face_resized = resize_face(face)
                 if face_resized is not None:
                     face_data_list.append(face_resized)
@@ -450,7 +533,7 @@ def login():
             print(f"検出された顔の数: {len(faces)}")
 
             for (x, y, w, h) in faces:
-                face = gray[y:y+h, x:x+w]
+                face = gray[y+y, x+x]
                 face_resized = resize_face(face)
                 if face_resized is not None:
                     detected_faces.append(face_resized)
