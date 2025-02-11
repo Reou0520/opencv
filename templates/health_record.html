@@ -16,6 +16,8 @@
             <tr>
                 <th>感情</th>
                 <th>健康状態</th>
+                <th>脈拍</th>
+                <th>脈拍状態</th>
                 <th>更新日時</th>
             </tr>
         </thead>
@@ -24,7 +26,9 @@
             <tr>
                 <td>{{ record[0] }}</td>  <!-- emotion -->
                 <td>{{ record[1] }}</td>  <!-- health_status -->
-                <td>{{ record[2] }}</td>  <!-- updated_at -->
+                <td>{{ record[2] }}/分</td>  <!-- pulse_rate -->
+                <td>{{ record[3] }}</td>  <!-- pulse_status -->
+                <td>{{ record[4] }}</td>  <!-- updated_at -->
             </tr>
             {% endfor %}
         </tbody>

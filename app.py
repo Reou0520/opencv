@@ -253,12 +253,23 @@ FPS = 15  # フレームレートを15fpsに制限
 frame_interval = 1 / FPS
 
 # 健康記録を10秒ごとに更新
-def save_health_record(user_name, emotion, health_status):
+def save_health_record(user_name, emotion, health_status, pulse_rate):
     try:
+        # 脈拍の状態を判定
+        if 60 <= pulse_rate <= 96:
+            pulse_status = "正常"
+        elif pulse_rate > 96:
+            pulse_status = "頻脈"
+        else:
+            pulse_status = "徐脈"
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO health_records (name, emotion, health_status) VALUES (%s, %s, %s)',
-                       (user_name, emotion, health_status))  # INSERT文を修正
+        cursor.execute('''
+            INSERT INTO health_records 
+            (name, emotion, health_status, pulse_rate, pulse_status) 
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (user_name, emotion, health_status, pulse_rate, pulse_status))
         conn.commit()
         conn.close()
     except Exception as e:
@@ -389,6 +400,29 @@ def generate_frames_with_info(user_name=None):
     y_health = y_schedule + 50
     y_pulse = y_health + 50  # 脈拍表示位置
 
+    def get_health_status(emotion, pulse_rate):
+        # 脈拍の状態を判定
+        if 60 <= pulse_rate <= 96:
+            pulse_condition = "正常"
+        else:
+            pulse_condition = "異常"  # 頻脈または徐脈
+
+        # 感情の分類
+        positive_emotions = ["笑顔", "中立", "驚き"]
+        negative_emotions = ["悲しみ", "怒り"]
+
+        # 健康状態の判定
+        if emotion in positive_emotions and pulse_condition == "正常":
+            return "健康状態: 〇"
+        elif emotion in positive_emotions and pulse_condition == "異常":
+            return "健康状態: △"
+        elif emotion in negative_emotions and pulse_condition == "正常":
+            return "健康状態: △"
+        elif emotion in negative_emotions and pulse_condition == "異常":
+            return "健康状態: ✕"
+        else:
+            return "健康状態: －"  # その他の感情の場合
+
     while True:
         success, frame = video_capture.read()
         if not success:
@@ -406,8 +440,9 @@ def generate_frames_with_info(user_name=None):
             schedule_info = get_google_calendar_events()
             last_update_time = current_time
 
+        # 天気情報の表示
         try:
-            frame = add_text_to_frame(frame, weather_info, (10, 30))
+            frame = add_text_to_frame(frame, weather_info, (10, 30), font_size=20)  # フォントサイズを20に
         except Exception as e:
             print(f"天気情報の描画エラー: {e}")
 
@@ -420,22 +455,23 @@ def generate_frames_with_info(user_name=None):
         # スケジュール情報の描画
         for item in schedule_info:
             try:
-                frame = add_text_to_frame(frame, item, (10, y_schedule))
+                frame = add_text_to_frame(frame, item, (10, y_schedule), font_size=18)  # フォントサイズを18に
             except Exception as e:
                 print(f"スケジュール情報の描画エラー: {e}")
 
         # 健康状態の表示
         frame, emotion = recognize_emotion(frame)
-        health_status = "健康状態: 良好" if emotion == "幸福" else "健康状態: "
-        frame = add_text_to_frame(frame, health_status, (10, y_health))
+        health_status = get_health_status(emotion, pulse_rate)
+        frame = add_text_to_frame(frame, health_status, (10, y_health), font_size=20)  # フォントサイズを20に
 
         # 10秒ごとに健康状態と感情を保存
         if user_name and current_time - last_save_time > save_interval:
-            save_health_record(user_name, emotion, health_status)
-            last_save_time = current_time  # 最後に保存した時刻を更新
+            save_health_record(user_name, emotion, health_status, pulse_rate)
+            last_save_time = current_time
 
-        # 脈拍情報とグラフの表示
+        # 脈拍情報とグラフの表示部分を修正
         if pulse_rate > 0:
+            # 1分間の脈拍情報を表示（1行目）
             pulse_status = f"脈拍: {pulse_rate}/分"
             if 60 <= pulse_rate <= 96:
                 pulse_status += " (正常)"
@@ -443,7 +479,12 @@ def generate_frames_with_info(user_name=None):
                 pulse_status += " (頻脈)"
             else:
                 pulse_status += " (徐脈)"
-            frame = add_text_to_frame(frame, pulse_status, (10, y_pulse))
+            frame = add_text_to_frame(frame, pulse_status, (10, y_pulse), font_size=20)  # フォントサイズを20に
+            
+            # 10秒間のカウント情報を表示（2行目）
+            count_10sec = pulse_rate // 6
+            count_status = f"10秒間のカウント: {count_10sec}回"
+            frame = add_text_to_frame(frame, count_status, (10, y_pulse + 30), font_size=18)  # フォントサイズを18にし、間隔も30に調整
             
             # 脈波グラフの描画
             frame = pulse_detector.draw_pulse_graph(frame)
@@ -518,16 +559,20 @@ def register():
             if not ret:
                 print("画像のキャプチャに失敗しました")
                 continue
+            
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
             print(f"検出された顔の数: {len(faces)}")
 
             for (x, y, w, h) in faces:
-                face = gray[y+y, x+x]
+                # 修正: 正しい顔領域の切り出し
+                face = gray[y:y+h, x:x+w]  # y+y, x+x を y:y+h, x:x+w に修正
                 face_resized = resize_face(face)
+                
                 if face_resized is not None:
                     face_data_list.append(face_resized)
+                    # 顔の周りに矩形を描画
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                     cv2.imshow('Face Registration', frame)
                     cv2.waitKey(1000)  # 1秒間表示
@@ -539,7 +584,7 @@ def register():
         cv2.destroyAllWindows()
         
         if len(face_data_list) > 0:
-            face_data_list_resized = [resize_face(face) for face in face_data_list if resize_face(face) is not None]
+            face_data_list_resized = [face for face in face_data_list if face is not None]
             if len(face_data_list_resized) > 0:
                 # 顔データをNumPyとして保存
                 np.save(f"face_data_{name}.npy", np.array(face_data_list_resized))
@@ -548,7 +593,7 @@ def register():
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 cursor.execute('INSERT INTO users (name, face_data) VALUES (%s, %s)', 
-                               (name, f"face_data_{name}.npy"))
+                             (name, f"face_data_{name}.npy"))
                 conn.commit()
                 conn.close()
                 return redirect(url_for('index'))
@@ -569,16 +614,20 @@ def login():
             if not ret:
                 print("画像のキャプチャに失敗しました")
                 continue
+            
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
             print(f"検出された顔の数: {len(faces)}")
 
             for (x, y, w, h) in faces:
-                face = gray[y+y, x+x]
+                # 修正: 正しい顔領域の切り出し
+                face = gray[y:y+h, x:x+w]  # y+y, x+x を y:y+h, x:x+w に修正
                 face_resized = resize_face(face)
+                
                 if face_resized is not None:
                     detected_faces.append(face_resized)
+                    # 顔の周りに矩形を描画
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                     cv2.imshow('Face Detection', frame)
                     cv2.waitKey(1000)  # 1秒間表示
@@ -655,14 +704,18 @@ def health_record():
     if user_name:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT emotion, health_status, updated_at FROM health_records WHERE name = %s ORDER BY updated_at DESC', (user_name,))
+        cursor.execute('''
+            SELECT emotion, health_status, pulse_rate, pulse_status, updated_at 
+            FROM health_records 
+            WHERE name = %s 
+            ORDER BY updated_at DESC
+        ''', (user_name,))
         records = cursor.fetchall()
         conn.close()
         return render_template('health_record.html', user=user_name, records=records)
     else:
         flash('ログインしてください')
         return redirect(url_for('login'))
-
 
 # ホームページ
 @app.route('/')
