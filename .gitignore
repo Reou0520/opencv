@@ -23,6 +23,8 @@ __pycache__/
 # 顔データファイルを無視
 face_data_*.npy
 token.json
+# 顔データファイルを無視
+face_data/*.npy
 
 # 一時ファイルや OS による不要なファイルを除外
 .DS_Store

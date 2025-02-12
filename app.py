@@ -586,14 +586,19 @@ def register():
         if len(face_data_list) > 0:
             face_data_list_resized = [face for face in face_data_list if face is not None]
             if len(face_data_list_resized) > 0:
+                # face_dataフォルダ内にファイルを保存
+                face_data_dir = "face_data"
+                os.makedirs(face_data_dir, exist_ok=True)  # フォルダが存在しない場合は作成
+                face_data_path = os.path.join(face_data_dir, f"face_data_{name}.npy")
+                
                 # 顔データをNumPyとして保存
-                np.save(f"face_data_{name}.npy", np.array(face_data_list_resized))
+                np.save(face_data_path, np.array(face_data_list_resized))
 
-                # MySQLに顔データのパスを保存
+                # MySQLに顔データのパスを保存（相対パスで保存）
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 cursor.execute('INSERT INTO users (name, face_data) VALUES (%s, %s)', 
-                             (name, f"face_data_{name}.npy"))
+                             (name, face_data_path))
                 conn.commit()
                 conn.close()
                 return redirect(url_for('index'))
