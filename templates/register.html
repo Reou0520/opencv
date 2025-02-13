@@ -6,94 +6,251 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
 </head>
 <body>
-    <img src="{{ url_for('video_feed') }}" width="640" height="480" id="camera-stream">
-    <form action="{{ url_for('register') }}" method="POST">
-        <label for="name">名前:</label>
-        <input type="text" id="name" name="name" required>
-        <button type="submit">登録</button>
-    </form>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="header">
+    </div>
+    <div class="container">
+        <img src="{{ url_for('video_feed') }}" id="camera-stream">
+        <form action="{{ url_for('register') }}" method="POST">
+            <label for="name">お名前</label>
+            <input type="text" id="name" name="name" required>
+            <button type="submit">登録</button>
+        </form>
+    </div>
     <a href="{{ url_for('index') }}" class="home-link">ホームページへ</a>
 </body>
 <style>
     /* 全体レイアウト */
     body {
-        background-color: #1a1a1a;  /* 黒背景 */
+        background-size: 400% 400%;
+        animation: gradientAnimation 15s ease infinite;
         margin: 0;
         padding: 0;
         font-family: 'Roboto', sans-serif;
         text-align: center;
-        color: #ffffff;  /* 白文字 */
-        display: block; /* 親要素がflexboxの影響を受けないように */
+        color: #ffffff;
+        display: block;
+        background-color: #0f0f0f;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(107,182,255, 0.05) 0%, transparent 70%),
+            linear-gradient(45deg, rgba(20, 20, 20, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
     }
 
-    /* カメラ映像のスタイル */
-    #camera-stream {
-        border: 3px solid #4a90e2;
-        border-radius: 10px;
-        margin-bottom: 10px;
+    /* ヘッダー */
+    .header {
+        margin: 10px 0; /* マージンを小さく */
     }
 
-    /* フォーム全体のスタイル */
-    form {
+    h1 {
+        font-size: 2.5rem; /* フォントサイズを少し小さく */
+        color: #ffffff;
+        margin: 0;
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    /* コンテナ */
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        width: 300px;
-        text-align: left;
-        margin: 0 auto;
-        position: relative; /* 親要素として位置を基準にする */
-        border: 3px solid #4a90e2;
+        margin-bottom: 80px; /* ホームリンクとの余白確保 */
+        min-height: calc(100vh - 200px); /* ヘッダーとマージンを考慮 */
+        overflow-y: auto; /* スクロール可能に */
     }
 
-    /* ラベルと入力欄のスタイル */
+    /* カメラ映像 */
+    #camera-stream {
+        width: 800px !important; /* !importantで優先度を上げる */
+        height: 550px !important;
+        border: 2px solid rgba(107,182,255, 0.4);
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(107,182,255, 0.1);
+        backdrop-filter: blur(8px);
+        object-fit: fill; /* アスペクト比を無視してサイズに合わせる */
+    }
+
+    /* フォーム */
+    form {
+        background: rgba(107,182,255, 0.05);
+        padding: 15px;  /* パディングを小さく */
+        border-radius: 12px;
+        width: 400px;  /* 幅を小さく */
+        text-align: center;  /* フォーム内の要素を中央揃えに */
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(107,182,255, 0.2);
+        box-shadow: 0 0 20px rgba(107,182,255, 0.1);
+        margin-bottom: 20px;  /* マージンも小さく */
+        box-sizing: border-box; /* paddingを含めた幅の計算 */
+    }
+
+    /* ラベルと入力欄 */
     label {
         font-size: 1.2rem;
         color: #ffffff;
+        display: block;
+        text-align: center;  /* 中央揃え */
+        margin-bottom: 10px;
     }
 
     input[type="text"] {
-        width: 100%;
+        width: 80%;  /* フォーム幅の80%に設定 */
         padding: 10px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+        margin: 0 auto 15px;  /* 左右のマージンを自動に設定 */
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(107,182,255, 0.3);
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 1rem;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
         box-sizing: border-box;
+        display: block;  /* ブロック要素として表示 */
     }
 
-    /* 登録ボタンのスタイル */
+    input[type="text"]:focus {
+        outline: none;
+        border-color: rgba(107,182,255, 0.6);
+        box-shadow: 0 0 15px rgba(107,182,255, 0.2);
+    }
+
+    /* ボタン */
     button {
-        font-size: 1.2rem;
-        padding: 10px 20px;
-        margin-top: 10px;
+        position: relative;
+        width: 120px; /* 幅を指定 */
+        padding: 10px; /* パディングを小さく */
+        background: rgba(107,182,255, 0.1);
+        color: #ffffff;
         border: none;
         border-radius: 8px;
-        background-color: #4a90e2;
-        color: white;
+        font-size: 1.1rem; /* フォントサイズを小さく */
+        font-weight: 500;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-        width: 100%;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(8px);
+        letter-spacing: 1px;
+        margin: 0 auto; /* 中央揃え */
+        display: block; /* ブロック要素に */
     }
 
     button:hover {
-        background-color: #357ABD;
+        background: rgba(107,182,255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107,182,255, 0.25);
     }
 
-    /* ホームページへのリンクボタンを左下に配置 */
+    /* ホームへ戻るリンク */
     .home-link {
-        position: absolute;
-        left: 400px;
-        bottom: 10px; /* フォームの下に少し余白を空けて配置 */
-        padding: 10px 20px;
-        color: white;
-        border-radius: 8px;
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        padding: 12px 25px;
+        color: #ffffff;
         text-decoration: none;
-        text-align: center;
-        border: 1px solid #ccc;
-
+        font-size: 1.1rem;
+        border-radius: 8px;
+        background: rgba(107,182,255, 0.1);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(107,182,255, 0.2);
     }
 
     .home-link:hover {
-        background-color: #357ABD;
+        background: rgba(107,182,255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(107,182,255, 0.2);
+    }
+
+    /* パーティクルアニメーション */
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* パーティクル要素のスタイル */
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .particle {
+        position: absolute;
+        background: linear-gradient(135deg, rgba(107,182,255, 0.3), rgba(107,182,255, 0.1));
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: pulseGlow 4s ease-in-out infinite, floatBubble 6s ease-in-out infinite;
+    }
+
+    /* パーティクルのアニメーション */
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.02); }
+    }
+
+    @keyframes floatBubble {
+        0%, 100% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-20px) translateX(10px); }
+    }
+
+    /* パーティクルの配置 */
+    .particle:nth-child(1) { width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { width: 80px; height: 80px; top: 40%; left: 40%; animation-delay: 1s; }
+    .particle:nth-child(4) { width: 120px; height: 120px; top: 80%; left: 20%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { width: 90px; height: 90px; top: 30%; left: 70%; animation-delay: 2s; }
+
+    /* レスポンシブ対応 */
+    @media (max-height: 800px) {
+        #camera-stream {
+            width: 480px !important;
+            height: 360px !important;
+        }
+
+        .container {
+            gap: 15px;
+            padding: 15px;
+        }
+
+        form {
+            width: 360px;
+            padding: 12px;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+    }
+
+    /* レスポンシブ対応の修正 */
+    @media (max-height: 900px) {
+        #camera-stream {
+            width: 640px !important;
+            height: 480px !important;
+        }
+
+        form {
+            width: 380px;  /* さらに小さく */
+        }
     }
 </style>
 
