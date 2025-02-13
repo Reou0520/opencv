@@ -7,6 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
 </head>
 <body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
     <div class="header">
         <h1>WellMirror</h1>
         <img src="{{ url_for('static', filename='images/WellMirror_icon.jpeg') }}" alt="WellMirror Logo" class="logo">
@@ -28,14 +35,91 @@
 
 <style>
     /* 全体レイアウト */
+    @keyframes gradientAnimation {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes pulseGlow {
+        0% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.02);
+        }
+        100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+    }
+
+    /* 追加のアニメーションキーフレーム */
+    @keyframes floatBubble {
+        0% {
+            transform: translateY(0) translateX(0);
+        }
+        50% {
+            transform: translateY(-20px) translateX(10px);
+        }
+        100% {
+            transform: translateY(0) translateX(0);
+        }
+    }
+
+    @keyframes shine {
+        0% {
+            background-position: -200% center;
+        }
+        100% {
+            background-position: 200% center;
+        }
+    }
+
+    /* 背景のグラデーションを強化 */
     body {
-        background-color: #1a1a1a;  /* 黒背景 */
+        background-size: 400% 400%;
+        animation: gradientAnimation 15s ease infinite;
         margin: 0;
         padding: 0;
         font-family: 'Roboto', sans-serif;
         text-align: center;
-        color: #ffffff;  /* 白文字 */
-        display: block; /* これを追加して、親要素がflexboxの影響を受けないようにします */
+        color: #ffffff;
+        display: block;
+        background-color: #0f0f0f;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(107,182,255, 0.05) 0%, transparent 70%),
+            linear-gradient(45deg, rgba(20, 20, 20, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    /* body::beforeの強化 */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            linear-gradient(125deg, rgba(107,182,255, 0.05) 0%, transparent 40%),
+            linear-gradient(-125deg, rgba(107,182,255, 0.05) 0%, transparent 40%);
+        filter: blur(1px);
+        pointer-events: none;
+        animation: gradientAnimation 10s ease infinite alternate;
     }
 
     /* ヘッダー（ロゴとタイトル） */
@@ -55,56 +139,233 @@
     }
 
     h1 {
-        font-size: 4rem;
-        color: #4a90e2;  /* ブルー */
+        font-size: 5.5rem;
+        color: #ffffff;  /* ブルー */
         margin: 0 30px 0 0;
+        position: relative;
+    }
+
+    /* シャイニングエフェクトの追加 */
+    h1::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(107,182,255, 0.2),
+            transparent
+        );
+        animation: shine 5s infinite;
     }
 
     /* ボタンの配置（縦並び） */
     .buttons {
         margin-top: 30px;
         display: flex;
-        flex-direction: column;  /* ボタンを縦並びにする */
-        align-items: center;  /* ボタンを中央に配置 */
+        flex-direction: column;
+        align-items: center;
     }
 
+    /* ボタンスタイルの更新 */
     button {
-        font-size: 1.2rem;
-        padding: 15px 30px;
-        margin: 10px;
-        border: 2px solid #ffffff; /* 白い枠線を追加 */
-        border-radius: 8px;
-        background-color: transparent; /* 背景色を透明に */
-        color: #ffffff;  /* 文字色は白 */
+        position: relative;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin: 15px auto;
+        width: 260px;
+        padding: 18px 30px;
+        color: #ffffff;
+        transition: all 0.4s ease-in-out;
+        font-weight: 550;  /* 太さを増加 */
+        font-size: 1.3rem;  /* サイズを少し大きく */
+        border: none;
         cursor: pointer;
-        transition: all 0.3s ease;  /* すべての変更にアニメーションを追加 */
-        width: 250px;  /* ボタンの幅を固定 */
+        background: rgba(107,182,255, 0.1);  /* 背景の透明度を上げる */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 12px;
+        letter-spacing: 2px;  /* 文字間隔を広げる */
+        text-transform: uppercase;
+        
+    }
+
+    button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        border-radius: 12px;
+        background: linear-gradient(
+            120deg,
+            rgba(107,182,255, 0.3),  /* グラデーションの透明度を上げる */
+            rgba(107,182,255, 0.2),
+            rgba(107,182,255, 0.1)
+        );
+        transition: all 0.4s;
     }
 
     button:hover {
-        background-color: #4a90e2; /* ホバー時に背景を白に */
-        color: #ffffff;  /* ホバー時に文字色を黒に */
+        transform: translateY(-2px);
+        box-shadow: 
+            0 6px 20px rgba(107,182,255, 0.25),  /* ホバー時の影を強調 */
+            0 0 30px rgba(107,182,255, 0.15);  /* ホバー時の光る効果を強調 */
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);  /* ホバー時のテキスト光効果を強調 */
+    }
+
+    button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: 0;
+        transition: all 0.4s;
+        border: 1px solid rgba(107,182,255, 0.4);
+        border-radius: 12px;
+        transform: scale(1.1, 1.1);
+    }
+
+    button:hover::before {
+        opacity: 0;
+        transform: scale(0.9, 0.9);
+    }
+
+    button:hover::after {
+        opacity: 1;
+        transform: scale(1, 1);
+    }
+
+    /* ボタンのアクティブ状態 */
+    button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 10px rgba(107,182,255, 0.1);
+    }
+
+    /* 虹色アニメーションのキーフレーム */
+    @keyframes rainbow {
+        0% {
+            filter: hue-rotate(0deg);
+        }
+        100% {
+            filter: hue-rotate(360deg);
+        }
     }
 
     /* ログイン情報メッセージ */
     .welcome-msg, .login-msg {
         font-size: 1.1rem;
-        margin-top: 20px;
+        margin-top: 10px;
     }
 
     /* ログアウトリンク */
     .logout-link {
+        position: relative;
         display: inline-block;
-        margin-top: 10px;
-        padding: 10px 20px;
-        background-color: #e94e77;
-        color: white;
-        border-radius: 8px;
+        padding: 12px 25px;
+        background: rgba(233, 78, 119, 0.2);
+        color: #ffffff;
+        border-radius: 12px;
         text-decoration: none;
+        font-weight: 500;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        transition: all 0.4s ease-in-out;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 
+            0 4px 15px rgba(233, 78, 119, 0.2),
+            0 0 20px rgba(233, 78, 119, 0.1);
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .logout-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        border-radius: 12px;
+        background: linear-gradient(
+            120deg,
+            rgba(233, 78, 119, 0.3),
+            rgba(233, 78, 119, 0.2),
+            rgba(233, 78, 119, 0.1)
+        );
+        transition: all 0.4s;
     }
 
     .logout-link:hover {
-        background-color: #d43f65;
+        background: rgba(233, 78, 119, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 
+            0 6px 20px rgba(233, 78, 119, 0.25),
+            0 0 30px rgba(233, 78, 119, 0.15);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+    }
+
+    .logout-link:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 10px rgba(233, 78, 119, 0.1);
+    }
+
+    /* 光の粒子効果を強化 */
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        background: linear-gradient(135deg, rgba(107,182,255, 0.3), rgba(107,182,255, 0.1));
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: 
+            pulseGlow 4s ease-in-out infinite,
+            floatBubble 6s ease-in-out infinite;
+    }
+
+    /* パーティクルのサイズとポジションを多様化 */
+    .particle:nth-child(1) { 
+        width: 100px; height: 100px; 
+        top: 10%; left: 10%; 
+        animation-delay: 0s; 
+    }
+    .particle:nth-child(2) { 
+        width: 150px; height: 150px; 
+        top: 70%; left: 80%; 
+        animation-delay: 0.5s; 
+    }
+    .particle:nth-child(3) { 
+        width: 80px; height: 80px; 
+        top: 40%; left: 40%; 
+        animation-delay: 1s; 
+    }
+    .particle:nth-child(4) { 
+        width: 120px; height: 120px; 
+        top: 80%; left: 20%; 
+        animation-delay: 1.5s; 
+    }
+    .particle:nth-child(5) { 
+        width: 90px; height: 90px; 
+        top: 30%; left: 70%; 
+        animation-delay: 2s; 
     }
 </style>
 
