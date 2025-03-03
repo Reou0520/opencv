@@ -4,15 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スマートミラー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <img id="video" src="{{ url_for('video_feed_info') }}" alt="カメラフィード">
-    <div class="overlay">
-        <div class="info">
-        </div>
-        <div class="info">
-            <ul>
-            </ul>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="container">
+        <img id="video" src="{{ url_for('video_feed_info') }}" alt="カメラフィード">
+        <div class="overlay">
+            <div class="info">
+            </div>
+            <div class="info">
+                <ul>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -20,30 +31,65 @@
     <a href="{{ url_for('index') }}" class="home-link">ホームページへ</a>
 
     <style>
+        /* 全体レイアウト */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #1a1a1a;  /* 黒背景 */
-            color: #333;
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
             margin: 0;
             padding: 0;
+            font-family: 'Roboto', sans-serif;
             text-align: center;
-            /* height: 100vh; */
+            color: #ffffff;
+            display: block;
+            background-color: #0f0f0f;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(107,182,255, 0.05) 0%, transparent 70%),
+                linear-gradient(45deg, rgba(20, 20, 20, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+            background-attachment: fixed;
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ヘッダー */
+        .header {
+            margin: 5px 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin: 0;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        /* コンテナ */
+        .container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            margin-bottom: 60px;
+            min-height: calc(100vh - 180px);
+            overflow-y: auto;
         }
 
+        /* カメラ映像 */
         #video {
-            margin: 10px auto;
-            width: 800px;
-            height: 100%;
+            width: 830px;  /* 800px + 30px */
+            height: calc(100% + 30px);  /* 既存の高さ + 30px */
+            border: 2px solid rgba(107,182,255, 0.4);
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(107,182,255, 0.1);
+            backdrop-filter: blur(8px);
             object-fit: cover;
-            z-index: -1;
-            border: 3px solid #4a90e2; /* 枠線追加 */
-            border-radius: 15px; /* 角を丸くする */
         }
 
+        /* オーバーレイ情報 */
         .overlay {
             position: absolute;
             top: 20px;
@@ -54,40 +100,119 @@
             text-align: left;
         }
 
-        button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #357ab7;
-        }
-
-       /* ホームページへのリンクボタンを左下に配置 */
+        /* ホームへ戻るリンク */
         .home-link {
-            position: absolute;
-            left: 400px;
-            bottom: 10px; /* フォームの下に少し余白を空けて配置 */
-            padding: 10px 20px;
-            color: white;
-            border-radius: 8px;
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 12px 30px;
+            color: #ffffff;
             text-decoration: none;
-            text-align: center;
-            border: 1px solid #ccc;
+            font-size: 1.2rem;
+            font-weight: 550;
+            border-radius: 12px;
+            background: rgba(107,182,255, 0.1);
+            backdrop-filter: blur(8px);
+            letter-spacing: 2px;
+            transition: all 0.4s ease-in-out;
+            border: none;
+        }
 
+        .home-link::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            border-radius: 12px;
+            background: linear-gradient(
+                120deg,
+                rgba(107,182,255, 0.3),
+                rgba(107,182,255, 0.2),
+                rgba(107,182,255, 0.1)
+            );
+            transition: all 0.4s;
         }
 
         .home-link:hover {
-            background-color: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 20px rgba(107,182,255, 0.25),
+                0 0 30px rgba(107,182,255, 0.15);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
         }
+
+        .home-link::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: all 0.4s;
+            border: 1px solid rgba(107,182,255, 0.4);
+            border-radius: 12px;
+            transform: scale(1.1, 1.1);
+        }
+
+        .home-link:hover::before {
+            opacity: 0;
+            transform: scale(0.9, 0.9);
+        }
+
+        .home-link:hover::after {
+            opacity: 1;
+            transform: scale(1, 1);
+        }
+
+        /* パーティクルアニメーション */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(107,182,255, 0.3), rgba(107,182,255, 0.1));
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: pulseGlow 4s ease-in-out infinite, floatBubble 6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.02); }
+        }
+
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(10px); }
+        }
+
+        /* パーティクルの配置 */
+        .particle:nth-child(1) { width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: 0.5s; }
+        .particle:nth-child(3) { width: 80px; height: 80px; top: 40%; left: 40%; animation-delay: 1s; }
+        .particle:nth-child(4) { width: 120px; height: 120px; top: 80%; left: 20%; animation-delay: 1.5s; }
+        .particle:nth-child(5) { width: 90px; height: 90px; top: 30%; left: 70%; animation-delay: 2s; }
     </style>
 </body>
 </html>

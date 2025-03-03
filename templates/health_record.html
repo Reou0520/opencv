@@ -7,33 +7,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
 </head>
 <body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
     <div class="header">
         <h1>健康記録</h1>
     </div>
     <h2>{{ user }}さんの健康記録</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>感情</th>
-                <th>健康状態</th>
-                <th>脈拍</th>
-                <th>脈拍状態</th>
-                <th>更新日時</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in records %}
-            <tr>
-                <td>{{ record[0] }}</td>  <!-- emotion -->
-                <td>{{ record[1] }}</td>  <!-- health_status -->
-                <td>{{ record[2] }}/分</td>  <!-- pulse_rate -->
-                <td>{{ record[3] }}</td>  <!-- pulse_status -->
-                <td>{{ record[4] }}</td>  <!-- updated_at -->
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>感情</th>
+                    <th>健康状態</th>
+                    <th>脈拍</th>
+                    <th>脈拍状態</th>
+                    <th>更新日時</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record[0] }}</td>  <!-- emotion -->
+                    <td>{{ record[1] }}</td>  <!-- health_status -->
+                    <td>{{ record[2] }}/分</td>  <!-- pulse_rate -->
+                    <td>{{ record[3] }}</td>  <!-- pulse_status -->
+                    <td>{{ record[4] }}</td>  <!-- updated_at -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     <div class="buttons">
         <button onclick="location.href='/smart_mirror'">スマートミラー</button>
         <button onclick="location.href='/'">ホームページへ</button>
@@ -44,77 +52,179 @@
 <style>
     /* 全体レイアウト */
     body {
-        background-color: #1a1a1a;  /* 黒背景 */
+        background-size: 400% 400%;
+        animation: gradientAnimation 15s ease infinite;
         margin: 0;
         padding: 0;
         font-family: 'Roboto', sans-serif;
         text-align: center;
-        color: #ffffff;  /* 白文字 */
-        display: block; /* これを追加して、親要素がflexboxの影響を受けないようにします */
+        color: #ffffff;
+        display: block;
+        background-color: #0f0f0f;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(107,182,255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(107,182,255, 0.05) 0%, transparent 70%),
+            linear-gradient(45deg, rgba(20, 20, 20, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
     }
 
     /* ヘッダー（タイトル） */
     .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 40px 0 0 50px;
+        margin: 20px 0;
     }
 
     h1 {
         font-size: 3rem;
-        color: #4a90e2;  /* ブルー */
-        margin: 0 30px 0 0;
+        color: #ffffff;
+        margin: 0;
+        position: relative;
     }
 
     h2 {
-        font-size: 2rem;
+        font-size: 1.8rem;
         margin: 20px 0;
+        color: rgba(107,182,255, 0.9);
+    }
+
+    /* テーブルコンテナ */
+    .table-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+        background: rgba(107,182,255, 0.05);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(107,182,255, 0.1);
+        margin-bottom: 30px; /* 100pxから30pxに変更 */
     }
 
     /* テーブルのスタイル */
     table {
-        width: 80%;
-        margin: 20px auto;
-        border-collapse: collapse;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0 auto;
     }
 
     th, td {
-        padding: 10px;
+        padding: 15px;
         text-align: left;
-        border: 1px solid #4a90e2;
+        border-bottom: 1px solid rgba(107,182,255, 0.2);
     }
 
     th {
-        background-color: #4a90e2;
+        background: rgba(107,182,255, 0.2);
         color: white;
+        font-weight: 500;
+        letter-spacing: 1px;
+    }
+
+    tr:hover {
+        background: rgba(107,182,255, 0.1);
     }
 
     /* ボタンの配置（縦並び） */
     .buttons {
-        margin-top: 30px;
+        position: relative;
+        margin-top: 10px; /* 30pxから10pxに変更 */
+        margin-bottom: 50px;
         display: flex;
-        flex-direction: column;  /* ボタンを縦並びにする */
-        align-items: center;  /* ボタンを中央に配置 */
+        flex-direction: column;
+        align-items: center;
     }
 
     button {
-        font-size: 1.2rem;
-        padding: 15px 30px;
-        margin: 10px;
-        border: 2px solid #ffffff; /* 白い枠線を追加 */
-        border-radius: 8px;
-        background-color: transparent; /* 背景色を透明に */
-        color: #ffffff;  /* 文字色は白 */
+        position: relative;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin: 10px auto; /* 15pxから10pxに変更 */
+        width: 260px;
+        padding: 18px 30px;
+        color: #ffffff;
+        transition: all 0.4s ease-in-out;
+        font-weight: 550;
+        font-size: 1.3rem;
+        border: none;
         cursor: pointer;
-        transition: all 0.3s ease;  /* すべての変更にアニメーションを追加 */
-        width: 250px;  /* ボタンの幅を固定 */
+        background: rgba(107,182,255, 0.1);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        border-radius: 12px;
+        background: linear-gradient(
+            120deg,
+            rgba(107,182,255, 0.3),
+            rgba(107,182,255, 0.2),
+            rgba(107,182,255, 0.1)
+        );
+        transition: all 0.4s;
     }
 
     button:hover {
-        background-color: #4a90e2; /* ホバー時に背景を白に */
-        color: #ffffff;  /* ホバー時に文字色を黒に */
+        transform: translateY(-2px);
+        box-shadow: 
+            0 6px 20px rgba(107,182,255, 0.25),
+            0 0 30px rgba(107,182,255, 0.15);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
     }
+
+    /* パーティクルアニメーション */
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .particle {
+        position: absolute;
+        background: linear-gradient(135deg, rgba(107,182,255, 0.3), rgba(107,182,255, 0.1));
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: pulseGlow 4s ease-in-out infinite, floatBubble 6s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.02); }
+    }
+
+    @keyframes floatBubble {
+        0%, 100% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-20px) translateX(10px); }
+    }
+
+    /* パーティクルの配置 */
+    .particle:nth-child(1) { width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { width: 80px; height: 80px; top: 40%; left: 40%; animation-delay: 1s; }
+    .particle:nth-child(4) { width: 120px; height: 120px; top: 80%; left: 20%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { width: 90px; height: 90px; top: 30%; left: 70%; animation-delay: 2s; }
 </style>
 
 </html>

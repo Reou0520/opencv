@@ -213,7 +213,6 @@ def add_icon_to_frame(frame, icon_url, position, border_color=(255, 0, 0), borde
 # モデルのロード
 model = load_model('fer2013_mini_XCEPTION.119-0.65.hdf5', compile=False)
 
-
 # 顔検出用のカスケード分類器
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -256,9 +255,9 @@ frame_interval = 1 / FPS
 def save_health_record(user_name, emotion, health_status, pulse_rate):
     try:
         # 脈拍の状態を判定
-        if 60 <= pulse_rate <= 96:
+        if 60 <= pulse_rate <= 100:
             pulse_status = "正常"
-        elif pulse_rate > 96:
+        elif pulse_rate > 100:
             pulse_status = "頻脈"
         else:
             pulse_status = "徐脈"
@@ -566,8 +565,7 @@ def register():
             print(f"検出された顔の数: {len(faces)}")
 
             for (x, y, w, h) in faces:
-                # 修正: 正しい顔領域の切り出し
-                face = gray[y:y+h, x:x+w]  # y+y, x+x を y:y+h, x:x+w に修正
+                face = gray[y:y+h, x:x+w]  
                 face_resized = resize_face(face)
                 
                 if face_resized is not None:
