@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <title>ログイン</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">  <!-- Google Fonts -->
+    <script>
+        function showLoadingMessage() {
+            // ログインボタンを非表示
+            document.getElementById('loginButton').style.display = 'none';
+            // ローディングメッセージを表示
+            document.getElementById('loadingMessage').style.display = 'block';
+            return true;
+        }
+    </script>
 </head>
 <body>
     <div class="particles">
@@ -16,8 +25,12 @@
     
     <div class="container">
         <img src="{{ url_for('video_feed') }}" id="camera-stream">
-        <form action="{{ url_for('login') }}" method="POST">
-            <button type="submit">ログイン</button>
+        <form action="{{ url_for('login') }}" method="POST" onsubmit="return showLoadingMessage()">
+            <button type="submit" id="loginButton">ログイン</button>
+            <div id="loadingMessage" style="display: none;">
+                <p>認証中です。少々お待ちください...</p>
+                <div class="loading-spinner"></div>
+            </div>
         </form>
     </div>
     <a href="{{ url_for('index') }}" class="home-link">ホームページへ</a>
@@ -269,6 +282,27 @@
         h1 {
             font-size: 2rem;
         }
+    }
+
+    #loadingMessage {
+        text-align: center;
+        padding: 20px;
+        color: #ffffff;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(107,182,255, 0.3);
+        border-top: 4px solid rgba(107,182,255, 1);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 </style>
 
